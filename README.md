@@ -144,3 +144,72 @@ Chương trình được viết cho board điều khiển **Matrix Mini R4** (Ar
 * `turn()`: Tự động phát hiện khi chạm vạch góc sa bàn, thực hiện hành vi xoay đầu quét camera tìm khối màu tiếp theo.
 * `last_step()`: Chuỗi hành động trả lái và đi thẳng/nhập làn an toàn sau khi đã né xong một khối.
 * `line_counter()`: Đếm số vạch góc sa bàn robot đã đi qua để kiểm soát điều kiện dừng (`EXIT`).
+
+# 🤖 Thư Viện Hàm Điều Khiển Robot Bám Tường PID (Matrix Mini R4)
+
+Mã nguồn triển khai bộ điều khiển **PID / PD** giúp robot bám tường (trái/phải), di chuyển giữa 2 tường và tự động nhận diện vạch màu (cam/xanh) để thực hiện chuỗi nhiệm vụ di chuyển tuần hoàn.
+
+---
+
+## 🛠 Phần Cứng & Kết Nối Cổng
+
+* **Bo điều khiển:** Matrix Mini R4
+* **Động cơ:**
+  * `M1`: Động cơ di chuyển chính (có Encoder).
+  * `M2`: Động cơ phụ (dùng trong hàm di chuyển giữa 2 tường).
+* **Servo Lái:** `RC1` (Điều chỉnh góc lái từ $47^\circ$ đến $133^\circ$, mặc định $90^\circ$ đi thẳng).
+* **Cảm biến Laser (MXLaserV2):**
+  * `I2C1`: Đo khoảng cách tường Trái.
+  * `I2C2`: Đo khoảng cách tường Phải.
+* **Cảm biến Màu sắc (MXColorV3):** `I2C3` (Đọc giá trị R, B để phát hiện đường vạch Cam / Xanh).
+
+---
+
+## 📐 Nguyên Lý Tính Toán Chồng Góc Laser
+
+Đoạn code sử dụng hệ số chia `0.707` ($\approx \sin(45^\circ)$ hoặc $\cos(45^\circ)$) để quy đổi khoảng cách cảm biến laser đặt nghiêng $45^\circ$ so với tường về khoảng cách vuông góc thực tế:
+
+$$d_{\text{thực tế}} = \frac{mm}{0.707}$$
+
+---
+
+## 📚 Danh Sách Các Hàm Chính
+
+### 1. Hàm Bám Tường Theo Quãng Đường (PD Control)
+Điều khiển robot bám tường và tự dừng khi đi đủ quãng đường `cm` / `number`.
+
+* `tuongtraiquangduong_n_tocdo_n_Kp_n_Kd_n_kc_n(...)`: Bám tường **Trái**.
+* `tuongphaiquangduong_n_tocdo_n_Kp_n_Kd_n_kc_n(...)`: Bám tường **Phải**.
+
+### 2. Hàm Bám Tường Đến Khi Gặp Vạch Màu (PID Control)
+Bám tường cho đến khi cảm biến màu sắc nhận diện được góc sa bàn (Cam hoặc Xanh).
+
+* `dibamtuongtraivoitocdo_n_khoangcach_n_n_n_n(...)`: Bám tường **Trái**.
+* `dibamtuongphaivoitocdo_n_khoangcach_n_n_n_n(...)`: Bám tường **Phải**.
+* `dithangmaucam_n_Kp_n_Ki_n_Kd_n_khoangcach_n(...)`: Bám tường Trái cho tới khi gặp **màu Cam**.
+* `dithangmauxanh_n_Kp_n_Ki_n_Kd_n_khoangcach_n(...)`: Bám tường Phải cho tới khi gặp **màu Xanh**.
+
+### 3. Hàm Rẽ Cố Định (Chạy Mù - Dead Reckoning)
+* `remu_n_quangduong_n_goc_n(speed, cm, goc)`: Khóa cố định góc lái `goc` và cho robot chạy đúng quãng đường `cm`.
+
+### 4. Hàm Bám Giữa 2 Tường
+* `digiua2tuongvoitocdo_n_Kp_n_Ki_n_Kd_n(...)`: So sánh khoảng cách 2 bên tường (`laser_trai - laser_phai`) và điều chỉnh công suất riêng biệt cho 2 động cơ `M1`, `M2`.
+
+---
+
+## 🎯 Hàm Nhiệm Vụ Tổng (NV1)
+
+Hàm `NV1voitocbandau_n_tocdithang_n_tocdore_n_Kp_n_Ki_n_Kd_n_Khoangcachtuong_n(...)` tự động thực hiện chuỗi hành vi:
+
+1. **Tự xác định hướng xuất phát:** So sánh khoảng cách 2 bên laser để chọn bám tường Trái hay Phải.
+2. **Nhận diện vạch màu đầu tiên:**
+   * **Nếu gặp màu Cam:** Rẽ ngoặt góc $130^\circ$ và lặp lại 11 lần chuỗi *(Bám tường gặp màu cam $\rightarrow$ Rẽ)*.
+   * **Nếu gặp màu Xanh:** Rẽ ngoặt góc $50^\circ$ và lặp lại 11 lần chuỗi *(Bám tường gặp màu xanh $\rightarrow$ Rẽ)*.
+3. **Thoát chuỗi:** Chạy thêm một đoạn cố định $60\text{ cm}$ và phanh dừng động cơ (`setBrake(true)`).
+
+---
+
+## 🚀 Hướng Dẫn Sử Dụng
+
+1. Bật nguồn robot Matrix Mini R4.
+2. Nhấn nút **UP** (`BTN_UP`) trên bo điều khiển để bắt đầu thực hiện Nhiệm Vụ 1 (NV1).
