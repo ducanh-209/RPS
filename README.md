@@ -145,7 +145,7 @@ Chương trình được viết cho board điều khiển **Matrix Mini R4** (Ar
 * `last_step()`: Chuỗi hành động trả lái và đi thẳng/nhập làn an toàn sau khi đã né xong một khối.
 * `line_counter()`: Đếm số vạch góc sa bàn robot đã đi qua để kiểm soát điều kiện dừng (`EXIT`).
 
-# 🤖 Thư Viện Hàm Điều Khiển Robot Bám Tường PID (Matrix Mini R4)
+# 🤖 Open Challenge
 
 Mã nguồn triển khai bộ điều khiển **PID / PD** giúp robot bám tường (trái/phải), di chuyển giữa 2 tường và tự động nhận diện vạch màu (cam/xanh) để thực hiện chuỗi nhiệm vụ di chuyển tuần hoàn.
 
