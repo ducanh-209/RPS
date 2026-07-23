@@ -15,6 +15,15 @@
 
 ---
 
+## TỔNG QUAN DỰ ÁN
+
+Dự án tập trung nghiên cứu, thiết kế và phát triển hệ thống điều khiển cho xe tự hành tham gia kỳ thi **World Robot Olympiad (WRO) 2026 - Bảng B6**. Hệ thống được thiết kế để giải quyết hai bài toán chính:
+
+1. **Thử thách Mở (Open Challenge):** Bám tường tự động, định vị đa cảm biến và tự động điều hướng theo tín hiệu nhận diện vạch mốc trên sa bàn.
+2. **Thử thách Vượt chướng ngại vật (Obstacle Challenge):** Nhận diện vật thể thông qua thị giác máy tính, phân loại màu sắc và thực hiện thuật toán né tránh động thời gian thực.
+
+---
+
 ## 📁 Cấu Trúc Thư Mục
 
 Repository được tổ chức theo các thư mục chức năng nhằm thuận tiện cho việc cài đặt, phát triển và tham khảo tài liệu của dự án.
